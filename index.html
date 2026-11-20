@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SuperAgent Loan Journey</title>
+<meta name="description" content="A voice-first, agentic personal loan journey prototype. Concept demo with synthetic data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --page:#ECEBF2;--page-fg:#151A2E;--page-dim:#5E6478;--page-line:#DCD9E6;--panel:#F7F6FB;--bezel:#11131C;
+  --ink:#151A2E;--dim:#6B7280;--faint:#A0A6B6;--line:#ECEAF2;--soft:#F4F4F8;--card:#fff;
+  --blue:#2F4BE8;--violet:#5B2EFF;--cyan:#00C8F0;--green:#10A98C;--green-bg:#E7F7F2;--amber:#B25E00;
+  --grad:linear-gradient(120deg,#0055FF,#5500FF 55%,#00EAFF);
+  --f:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0D0F18;--page-fg:#ECEBF5;--page-dim:#A2A7BA;--page-line:#262A3A;--panel:#151826;--bezel:#000}}
+:root[data-theme="dark"]{--page:#0D0F18;--page-fg:#ECEBF5;--page-dim:#A2A7BA;--page-line:#262A3A;--panel:#151826;--bezel:#000}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--page);color:var(--page-fg);font-family:var(--f);-webkit-font-smoothing:antialiased}
+button,input{font-family:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+
+/* ---------- stage ---------- */
+.stage{height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0 16px}
+.shell{display:flex;align-items:center;gap:32px;transform-origin:center;flex:none}
+.device{width:414px;height:868px;border-radius:56px;background:var(--bezel);padding:12px;box-shadow:0 40px 80px rgba(20,16,50,.28);flex:none}
+.app{position:relative;width:100%;height:100%;border-radius:44px;overflow:hidden;display:flex;flex-direction:column;color:var(--ink);
+  background:radial-gradient(420px 300px at 0% 0%,rgba(0,85,255,.06),transparent 65%),radial-gradient(420px 320px at 100% 40%,rgba(91,46,255,.05),transparent 65%),#FBFBFD}
+.sbar{height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 30px 0 34px;font-weight:600;font-size:14.5px;font-variant-numeric:tabular-nums;position:relative;z-index:6}
+.island{position:absolute;left:50%;top:10px;transform:translateX(-50%);width:118px;height:32px;border-radius:20px;background:#000}
+.homebar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#151A2E;opacity:.85;z-index:60;pointer-events:none}
+
+/* ---------- header ---------- */
+.hd{height:58px;flex:none;display:flex;align-items:center;gap:10px;padding:0 10px 0 18px;position:relative;z-index:5}
+.logo{width:32px;height:32px;border-radius:24%;flex:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6zM19 14l.9 2.6L22 17.5l-2.1.8L19 21l-.9-2.7L16 17.5l2.1-.9z'/%3E%3C/svg%3E") center/58% no-repeat,linear-gradient(135deg,#0055FF,#5500FF 60%,#00C8F0);box-shadow:0 2px 8px rgba(85,0,255,.25)}
+.hdt{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.hdt b{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+.sa{font-size:10px;font-weight:600;letter-spacing:.04em;padding:2px 7px;border-radius:999px;color:#fff;background:var(--grad);display:none}
+.sa.on{display:inline-block}
+.hst{font-size:11.5px;font-weight:500;color:var(--dim);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;background:none;padding:0;text-align:left;cursor:pointer;max-width:100%}
+.hst .dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none}
+.hst.work .dot{background:var(--violet);animation:blink 1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+.ib{width:40px;height:40px;border:0;background:transparent;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--ink);flex:none}
+.ib:hover{background:rgba(21,26,46,.05)}
+.ib.on{color:var(--violet)}
+
+/* ---------- thread ---------- */
+.thread{flex:1;min-height:0;overflow-y:auto;padding:8px 20px 18px;display:flex;flex-direction:column;gap:14px;scrollbar-width:none}
+.thread::-webkit-scrollbar{display:none}
+.thread>*{flex:none}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.say{margin:0;font-size:16.5px;line-height:1.5;font-weight:500;letter-spacing:-.005em;animation:rise .35s ease both;text-wrap:pretty}
+.say b{font-weight:650}
+.me{align-self:flex-end;max-width:80%;background:#F0EFF6;padding:10px 14px;border-radius:20px 20px 5px 20px;font-size:15px;font-weight:550;line-height:1.4;animation:rise .3s ease both}
+.me .via{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--violet);margin-bottom:2px}
+.typing{display:flex;gap:5px;padding:4px 0;animation:rise .2s ease both}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--violet);opacity:.3;animation:td 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes td{50%{opacity:1;transform:translateY(-2px)}}
+
+/* live background line → chip */
+.live{display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500;color:var(--dim);animation:rise .3s ease both;min-height:22px}
+.spin{width:16px;height:16px;border-radius:50%;flex:none;background:conic-gradient(from 0deg,#0055FF,#5500FF,#00EAFF,transparent 75%);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.shim{background:linear-gradient(90deg,#6B7280 0%,#6B7280 35%,#5B2EFF 50%,#6B7280 65%,#6B7280 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shim 1.6s linear infinite}
+@keyframes shim{from{background-position:120% 0}to{background-position:-120% 0}}
+.live .lt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rlink{margin-left:auto;flex:none;border:0;background:none;color:var(--blue);font-size:12px;font-weight:600;padding:2px 0;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
+.chip .rl{color:var(--blue);font-weight:600;text-decoration:underline;text-underline-offset:2px;flex:none}
+.chip .sep{color:var(--faint);flex:none}
+.recs{border:1px solid var(--line);border-radius:16px;padding:2px 14px}
+.rr{display:grid;grid-template-columns:minmax(0,1fr) auto 18px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid #F0EFF5;font-size:13px}
+.rr:first-child{border-top:0}
+.rr span{color:var(--dim);font-weight:500}
+.rr b{font-weight:600;text-align:right;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.rr em{display:flex;justify-content:flex-end;font-style:normal}
+.okd{width:16px;height:16px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center}
+.rsk{display:inline-block;width:72px;height:10px;border-radius:5px;background:linear-gradient(90deg,#EEEDF4,#DCD6F3,#EEEDF4);background-size:200% 100%;animation:shim 1.2s linear infinite;vertical-align:middle}
+.meta{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:12.5px;background:#F7F8FB;border-radius:14px;padding:10px 12px}
+.meta span{color:var(--dim);font-weight:500}.meta b{font-weight:600}
+.sl2{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:-6px}
+.txn{width:100%;border-collapse:collapse;font-size:12px}
+.txn th,.txn td{padding:7px 4px;border-bottom:1px solid #F0EFF5;text-align:left}
+.txn td:last-child,.txn th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.txn th{font-size:10px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+pre.raw{margin:8px 0 0;background:#0F1220;color:#CFE3FF;border-radius:12px;padding:12px;font:500 11px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}
+.lrec{border:0;background:none;color:#5B6CFF;font-size:11px;font-weight:600;padding:0;margin-left:6px;text-decoration:underline;text-underline-offset:2px}
+.vinfo{font-size:11.5px;color:var(--page-dim);display:flex;gap:6px;align-items:center}
+.src{margin-left:auto;font-size:9.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);white-space:nowrap}
+.bgrow{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#F6F6F9;border-radius:999px;padding:4px 10px 4px 5px;font-size:12px;font-weight:550;color:#424960;animation:rise .3s ease both;max-width:100%}
+.chip:hover{border-color:#CFC8F3;background:#F3F1FC}
+.chip .ok{width:16px;height:16px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* active card */
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 8px 28px rgba(21,26,46,.06);animation:rise .4s ease both}
+.card.out{opacity:0;transform:translateY(-4px);transition:all .18s}
+.ch{display:flex;gap:12px;align-items:flex-start}
+.ci{width:36px;height:36px;border-radius:12px;background:#F1EEFF;color:var(--violet);display:flex;align-items:center;justify-content:center;flex:none}
+.ch b{display:block;font-size:15px;font-weight:600;line-height:1.3}
+.ch span{display:block;font-size:12.5px;color:var(--dim);font-weight:500;margin-top:2px;line-height:1.4}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:999px;padding:14px 18px;background:var(--ink);color:#fff;font-size:15px;font-weight:600;transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.985)}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn2{display:flex;align-items:center;justify-content:center;width:100%;border:0;border-radius:999px;padding:13px 18px;background:#F1F1F5;color:var(--ink);font-size:14.5px;font-weight:600}
+.row2{display:flex;gap:8px}.row2>*{flex:1}
+
+/* OTP + trust layer */
+.otp{display:flex;gap:7px;justify-content:space-between}
+.otp i{flex:1;height:52px;border:1.5px solid #E6E4EE;border-radius:13px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;transition:border-color .2s,background .2s}
+.otp i.f{border-color:#B9A6FF;background:#FAF8FF;animation:pop .22s ease}
+@keyframes pop{from{transform:scale(.85)}to{transform:none}}
+.af{font-size:12px;font-weight:600;color:var(--dim);display:flex;align-items:center;gap:6px;min-height:18px}
+.af.ok{color:var(--green)}
+.trust{list-style:none;margin:0;padding:10px 12px;border-radius:14px;background:#F7F8FB;display:flex;flex-direction:column;gap:7px}
+.trust li{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.4;color:#4B5168;font-weight:500}
+.trust li svg{flex:none;margin-top:1px;color:var(--green)}
+.trust b{font-weight:600;color:var(--ink)}
+.tag{display:inline-block;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:999px;background:#FFF3D6;color:#8A5A00;vertical-align:1px}
+
+/* consent */
+.cons{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:14px;background:#F7F8FB;font-size:13px;line-height:1.5;font-weight:500;color:#2A3047;cursor:pointer}
+.cons input{appearance:none;-webkit-appearance:none;width:22px;height:22px;border-radius:7px;border:1.8px solid #B9BFCE;background:#fff;flex:none;margin:0;display:grid;place-content:center;cursor:pointer;transition:all .15s}
+.cons input:checked{background:var(--violet);border-color:var(--violet)}
+.cons input:checked::after{content:'';width:10px;height:6px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.cons.nudge{animation:nudge .4s}
+@keyframes nudge{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+/* path options */
+.opt{display:flex;flex-direction:column;gap:3px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:18px;padding:14px;color:var(--ink);transition:border-color .15s}
+.opt b{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.opt span{font-size:12.5px;color:var(--dim);font-weight:500;line-height:1.4}
+.opt em{font-style:normal;font-size:11px;font-weight:600;color:var(--violet);margin-top:4px}
+.opt.rec{border:1.5px solid transparent;background:linear-gradient(#fff,#fff) padding-box,var(--grad) border-box}
+.opt:hover{border-color:#C9BEFA}
+
+/* banks */
+.bank{display:flex;align-items:center;gap:12px;width:100%;border:1px solid var(--line);background:#fff;border-radius:16px;padding:12px;text-align:left;color:var(--ink)}
+.bank:hover{border-color:#C9BEFA}
+.bl{width:38px;height:38px;border-radius:11px;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;letter-spacing:.02em}
+.bank b{display:block;font-size:14.5px;font-weight:600}
+.bank span{font-size:12px;color:var(--dim);font-weight:500}
+.bank .chev{margin-left:auto;color:var(--faint)}
+
+/* offer */
+.olab{font-size:12px;font-weight:600;color:var(--dim);letter-spacing:.02em}
+.oamt{font-size:36px;font-weight:650;letter-spacing:-.025em;line-height:1.05;font-variant-numeric:tabular-nums}
+.oemi{font-size:15px;font-weight:500;color:var(--dim)}
+.oemi b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.tens{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ten{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 4px;font-size:12.5px;font-weight:600;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:1px}
+.ten small{font-size:10.5px;font-weight:500;color:var(--dim);font-variant-numeric:tabular-nums}
+.ten.on{border:1.5px solid var(--violet);background:#F4F1FF}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #F0EFF5;font-size:13px}
+.kv:first-child{border-top:0}
+.kv span{color:var(--dim);font-weight:500}
+.kv b{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.kvs{display:flex;flex-direction:column}
+details.more{border-top:1px solid #F0EFF5;padding-top:8px}
+details.more summary{list-style:none;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--blue);display:flex;align-items:center;gap:4px}
+details.more summary::-webkit-details-marker{display:none}
+details.more[open] summary svg{transform:rotate(180deg)}
+
+/* address / work / mandate */
+.addr{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:14px;background:#F7F8FB;font-size:14px;line-height:1.5;font-weight:500}
+.addr svg{flex:none;color:var(--violet);margin-top:2px}
+.wrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #F0EFF5;font-size:13.5px}
+.wrow:first-child{border-top:0}
+.wrow span{color:var(--dim);font-weight:500}
+.wrow b{font-weight:600;text-align:right}
+.wrow b.pend{color:var(--faint);font-weight:500}
+.wrow.now{background:#F6F3FF;margin:0 -10px;padding:10px;border-radius:12px;border-top-color:transparent}
+.wrow.now b.pend{color:var(--violet)}
+.wrow.now+.wrow{border-top-color:transparent}
+.payb{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.payb i{font-style:normal;width:28px;height:28px;border-radius:8px;background:#0B4EA2;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center}
+
+/* final */
+.okhead{display:flex;gap:12px;align-items:center}
+.okic{width:44px;height:44px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;flex:none;animation:pop .4s ease}
+.okhead b{display:block;font-size:16px;font-weight:650}
+.okhead div span{font-size:12.5px;color:var(--dim);font-weight:500}
+.trk{display:flex;flex-direction:column}
+.tr{display:flex;gap:12px;position:relative;padding-bottom:14px}
+.tr:last-child{padding-bottom:0}
+.tr:not(:last-child)::before{content:'';position:absolute;left:10px;top:22px;bottom:2px;width:2px;background:var(--line)}
+.tr.ok:not(:last-child)::before{background:var(--green)}
+.td{width:22px;height:22px;border-radius:50%;border:2px solid #DADCE5;background:#fff;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;z-index:1}
+.tr.ok .td{background:var(--green);border-color:var(--green)}
+.tr.cur .td{border-color:var(--violet);border-right-color:transparent;animation:sp 1.1s linear infinite}
+.tr div{display:flex;flex-direction:column;gap:1px;font-size:13.5px;font-weight:600;padding-top:1px}
+.tr div span{font-size:12px;color:var(--dim);font-weight:500}
+.note{font-size:12px;color:var(--dim);font-weight:500;line-height:1.45}
+
+/* ---------- dock ---------- */
+.dock{flex:none;padding:0 14px 22px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:4}
+.sugg{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px}
+.sugg::-webkit-scrollbar{display:none}
+.sg{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:550;color:var(--ink);animation:rise .3s ease both;box-shadow:0 2px 6px rgba(21,26,46,.04)}
+.sg:hover{border-color:#C9BEFA}
+.bar{display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:5px 5px 5px 18px;box-shadow:0 8px 28px rgba(21,26,46,.10),0 0 0 1px rgba(21,26,46,.04)}
+.bar input{flex:1;min-width:0;border:0;outline:none;background:transparent;font-size:15px;color:var(--ink)}
+.bar input::placeholder{color:#8E93A4}
+.send{width:38px;height:38px;border-radius:50%;border:0;background:#F1F1F5;color:var(--ink);display:none;align-items:center;justify-content:center;flex:none}
+.send.show{display:flex}
+.mic{position:relative;width:48px;height:48px;border-radius:50%;border:0;background:#F1F1F5;color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none;transition:background .2s}
+.mic.on{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(85,0,255,.28)}
+.mic.listen::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid #8B6BFF;animation:ring 1.2s ease-out infinite;pointer-events:none}
+@keyframes ring{from{transform:scale(.9);opacity:.9}to{transform:scale(1.3);opacity:0}}
+.mic .bars{display:none;gap:3px;align-items:center;height:18px}
+.mic .bars i{width:3px;border-radius:2px;background:currentColor;animation:eq .7s ease-in-out infinite}
+.mic .bars i:nth-child(2){animation-delay:.12s}.mic .bars i:nth-child(3){animation-delay:.24s}.mic .bars i:nth-child(4){animation-delay:.36s}
+@keyframes eq{0%,100%{height:4px}50%{height:16px}}
+.mic.talk .bars{display:flex}.mic.talk .mi{display:none}
+.vhint{text-align:center;font-size:11.5px;font-weight:500;color:var(--faint);min-height:15px;margin-top:-4px}
+.vhint.live{color:var(--violet)}
+
+/* ---------- start screen ---------- */
+.start{position:absolute;inset:46px 0 0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:0 32px 60px;text-align:center;
+  background:radial-gradient(380px 300px at 50% 32%,rgba(91,46,255,.10),transparent 70%),#FBFBFD;transition:opacity .35s,transform .35s}
+.start.gone{opacity:0;transform:scale(1.02);pointer-events:none}
+.orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff 0%,#CFFBFF 12%,#00EAFF 30%,#5500FF 68%,#0055FF 100%);box-shadow:0 24px 60px rgba(85,0,255,.30),inset 0 -10px 24px rgba(0,0,0,.12);animation:breathe 3.4s ease-in-out infinite;border:0;padding:0}
+@keyframes breathe{50%{transform:scale(1.06)}}
+.start h1{margin:0;font-size:30px;font-weight:650;letter-spacing:-.02em}
+.start p{margin:-10px 0 0;font-size:15px;color:var(--dim);font-weight:500;line-height:1.5}
+.start .btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px}
+.start .btn{background:var(--grad);box-shadow:0 10px 24px rgba(85,0,255,.25)}
+.start .fine{font-size:11.5px;color:var(--faint);font-weight:500;line-height:1.5;max-width:300px}
+.linkb{border:0;background:none;color:var(--blue);font-size:13.5px;font-weight:600;padding:6px}
+
+/* ---------- sheets / alert / sms / toast ---------- */
+.scrim{position:absolute;inset:0;background:rgba(21,26,46,.36);z-index:40;opacity:0;transition:opacity .25s}
+.scrim.show{opacity:1}
+.sheet{text-align:left;position:absolute;left:0;right:0;bottom:0;max-height:86%;overflow-y:auto;background:#fff;border-radius:26px 26px 0 0;padding:10px 20px 30px;display:flex;flex-direction:column;gap:14px;z-index:41;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);box-shadow:0 -10px 40px rgba(21,26,46,.18)}
+.sheet.show{transform:none}
+.grab{width:40px;height:4px;border-radius:2px;background:#E2E1EA;align-self:center;flex:none}
+.sht{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.sht>div:first-child{flex:1;min-width:0}
+.sht h2{margin:0;font-size:18px;font-weight:650}
+.sht p{margin:3px 0 0;font-size:12.5px;color:var(--dim);font-weight:500}
+.alert{position:absolute;left:50%;top:50%;width:280px;transform:translate(-50%,-46%) scale(.96);opacity:0;z-index:41;background:rgba(250,250,252,.98);backdrop-filter:blur(18px);border-radius:20px;overflow:hidden;text-align:center;transition:all .22s;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.alert.show{opacity:1;transform:translate(-50%,-50%)}
+.alert .ab{padding:20px 18px 16px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.alert .ab b{font-size:15.5px;font-weight:600;line-height:1.35}
+.alert .ab span{font-size:12.5px;color:var(--dim);font-weight:500;line-height:1.45}
+.alert button{display:block;width:100%;border:0;border-top:1px solid #E4E4EA;background:transparent;padding:13px;font-size:15.5px;color:#0A66E8}
+.alert button.pri{font-weight:600}
+.files{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.file{position:relative;border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:8px;text-align:left;color:var(--ink)}
+.file.on{border-color:var(--violet);background:#F7F4FF}
+.file .th{height:74px;border-radius:10px;overflow:hidden;position:relative}
+.file b{font-size:12.5px;font-weight:600;line-height:1.25}
+.file small{font-size:11px;color:var(--dim)}
+.file .tick{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid #C9CDD8;display:flex;align-items:center;justify-content:center;color:#fff}
+.file.on .tick{background:var(--violet);border-color:var(--violet)}
+.sms{position:absolute;left:10px;right:10px;top:10px;z-index:55;background:rgba(250,250,253,.95);backdrop-filter:blur(18px);border-radius:22px;padding:12px 14px;box-shadow:0 12px 36px rgba(21,26,46,.2);display:flex;gap:10px;align-items:center;transform:translateY(-140%);transition:transform .45s cubic-bezier(.2,.9,.2,1.1)}
+.sms.show{transform:none}
+.sms .ai{width:34px;height:34px;border-radius:9px;background:linear-gradient(#5BE16C,#2BC447);flex:none;display:flex;align-items:center;justify-content:center;color:#fff}
+.sms b{font-size:12px;font-weight:600;display:flex;justify-content:space-between}
+.sms span{font-size:13px;font-weight:500;line-height:1.35}
+.toast{position:absolute;left:50%;bottom:120px;transform:translate(-50%,16px);background:#151A2E;color:#fff;padding:10px 16px;border-radius:999px;font-size:12.5px;font-weight:550;opacity:0;transition:all .25s;z-index:58;width:max-content;max-width:86%;text-align:center;line-height:1.4;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- video KYC ---------- */
+.vk{position:absolute;inset:0;z-index:45;background:#05060A;color:#fff;display:flex;flex-direction:column;animation:fadein .3s ease both}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.vkcam{position:absolute;inset:0}
+.vkcam video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:none}
+.vkcam.live video{display:block}
+.vkph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 80% at 50% 38%,#262B3E 0%,#0C0E15 70%)}
+.vkcam.live .vkph{display:none}
+.vkph svg{opacity:.55}
+.vkface{position:absolute;left:50%;top:36%;width:190px;height:240px;transform:translate(-50%,-50%);border-radius:50%;border:2px dashed rgba(255,255,255,.45);transition:border-color .3s}
+.vkface.ok{border:2.5px solid #2FE0B5}
+.vkface.scan{border-color:#8B7BFF;animation:fsc 1s ease-in-out infinite}
+@keyframes fsc{50%{box-shadow:0 0 0 8px rgba(139,123,255,.18)}}
+.vktop{position:absolute;left:0;right:0;top:0;padding:56px 18px 30px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(rgba(0,0,0,.55),transparent);font-size:13px;font-weight:600;z-index:2}
+.rec{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,.45);padding:5px 10px;border-radius:999px;font-size:11.5px;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.rec i{width:7px;height:7px;border-radius:50%;background:#FF3B30;animation:blink 1.2s infinite}
+.vkoff{position:absolute;right:16px;top:104px;width:92px;height:122px;border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#3B3F57,#1A1C27);border:1.5px solid rgba(255,255,255,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;z-index:2}
+.vkoff .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#F2A65A,#C2577A);display:flex;align-items:center;justify-content:center;font-weight:700}
+.vkoff span{font-size:10.5px;text-align:center;line-height:1.25;color:rgba(255,255,255,.85)}
+.vkoff.talk{border-color:#2FE0B5}
+.vkframe{position:absolute;left:50%;top:40%;width:270px;height:172px;transform:translate(-50%,-50%);z-index:1}
+.vkframe>i{position:absolute;width:30px;height:30px;border:3px solid #fff;border-radius:6px}
+.vkframe>i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}.vkframe>i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
+.vkframe>i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}.vkframe>i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
+.vkframe.ok>i{border-color:#2FE0B5}
+.vkdoc{position:absolute;inset:14px;border-radius:10px;transform:rotate(-3deg);box-shadow:0 18px 30px rgba(0,0,0,.5);overflow:hidden}
+.vkcam.live~.vkframe .vkdoc{display:none}
+.vkscan{position:absolute;left:10px;right:10px;height:2px;top:10%;background:linear-gradient(90deg,transparent,#4FE3FF,transparent);box-shadow:0 0 12px #4FE3FF;animation:scan 1.1s ease-in-out infinite alternate;display:none}
+.vkframe.scan .vkscan{display:block}
+@keyframes scan{to{top:90%}}
+.vkfoot{position:absolute;left:0;right:0;bottom:0;padding:40px 18px 34px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(transparent,rgba(0,0,0,.75) 30%);z-index:2}
+.vkcap{background:rgba(255,255,255,.12);backdrop-filter:blur(10px);border-radius:16px;padding:12px 14px;font-size:14.5px;font-weight:500;line-height:1.45}
+.vkcap small{display:block;font-size:10.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#9FF3DD;margin-bottom:3px}
+.vkchk{display:flex;gap:6px}
+.vkchk span{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;padding:7px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.65)}
+.vkchk span.ok{background:rgba(47,224,181,.2);color:#9FF3DD}
+.btn.light{background:#fff;color:var(--ink)}
+
+/* ---------- side panel ---------- */
+.side{width:380px;height:868px;flex:none;background:var(--panel);border:1px solid var(--page-line);border-radius:28px;display:flex;flex-direction:column;overflow:hidden;color:var(--page-fg)}
+@media (max-width:960px){.side{display:none}}
+body.noside .side{display:none}
+.sdh{padding:20px 20px 14px;border-bottom:1px solid var(--page-line);display:flex;flex-direction:column;gap:10px;flex:none}
+.sdh h2{margin:0;font-size:16px;font-weight:650}
+.sdh p{margin:0;font-size:12px;line-height:1.5;color:var(--page-dim)}
+.pbtns{display:flex;gap:8px}
+.pb{border:1px solid var(--page-line);background:var(--page);color:var(--page-fg);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:600}
+.pb.pri{background:var(--page-fg);color:var(--panel);border-color:var(--page-fg)}
+.sdb{flex:1;overflow-y:auto;padding:14px 18px 22px;scrollbar-width:thin}
+.sl{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--page-dim);margin:4px 0 8px}
+.steps{list-style:none;margin:0 0 18px;padding:0;display:flex;flex-direction:column;gap:2px}
+.steps li{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:var(--page-dim);padding:5px 8px;border-radius:10px}
+.steps li i{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--page-line);flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;color:#fff}
+.steps li.done{color:var(--page-fg)}
+.steps li.done i{background:#10A98C;border-color:#10A98C}
+.steps li.cur{background:var(--page);color:var(--page-fg);font-weight:600}
+.steps li.cur i{border-color:#7B5CFF;border-right-color:transparent;animation:sp 1.1s linear infinite}
+.lg{display:flex;flex-direction:column;gap:6px}
+.le{border:1px solid var(--page-line);background:var(--page);border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.4}
+.le .l1{display:flex;align-items:center;gap:6px;font-weight:600}
+.le .l1 em{font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:999px;border:1px solid var(--page-line);color:var(--page-dim)}
+.le .l1 .t{margin-left:auto;font-weight:500;color:var(--page-dim);font-size:10.5px;font-variant-numeric:tabular-nums}
+.le .l2{color:var(--page-dim);margin-top:2px}
+.le.run .l1 em{color:#7B5CFF;border-color:#7B5CFF}
+.le.done .l1 em{color:#10A98C;border-color:#10A98C}
+.le.you .l1 em{color:#B26200;border-color:#B26200}
+.empty{font-size:12px;color:var(--page-dim)}
+
+/* ---------- phone-size screens ---------- */
+@media (max-width:520px){
+  html,body{overflow:hidden}
+  .stage{position:fixed;inset:0;padding:0;display:block}
+  .shell{display:block;height:100%;transform:none!important}
+  .device{width:100%;height:100%;border-radius:0;padding:0;box-shadow:none;background:transparent}
+  .app{border-radius:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .sbar,.homebar{display:none}
+  .start{inset:0}
+  .vktop{padding-top:18px}.vkoff{top:64px}
+  .dock{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+}
+@media (min-width:521px){.mobonly{display:none!important}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="stage"><div class="shell" id="show">
+  <div class="device"><div class="app" id="app">
+    <div class="sbar"><span id="clock">9:41</span><span class="island"></span><span>
+      <svg width="18" height="12" viewBox="0 0 18 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1" fill="#151A2E"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#151A2E"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#151A2E"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#151A2E"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13" aria-hidden="true"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#151A2E" opacity=".4"/><rect x="2" y="2" width="17" height="9" rx="2" fill="#151A2E"/></svg>
+    </span></div>
+
+    <header class="hd">
+      <span class="logo" aria-hidden="true"></span>
+      <div class="hdt"><b>Loan Assistant <span class="sa" id="saBadge">SuperAgent</span></b>
+        <button class="hst" id="hst" aria-live="polite" title="See background activity"><span class="dot"></span><span id="hstT">Online</span></button></div>
+      <button class="ib" id="spkBtn" aria-label="Mute spoken replies" aria-pressed="true"></button>
+      <button class="ib mobonly" id="actBtn" aria-label="Background activity"></button>
+      <button class="ib" id="rstBtn" aria-label="Start over"></button>
+    </header>
+
+    <main class="thread" id="thread" aria-live="polite"></main>
+
+    <div class="dock">
+      <div class="sugg" id="sugg"></div>
+      <form class="bar" id="bar" autocomplete="off">
+        <label for="inp" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Message</label>
+        <input id="inp" placeholder="Type, or tap the mic and talk">
+        <button class="send" id="sendBtn" type="submit" aria-label="Send"></button>
+        <button class="mic" id="micBtn" type="button" aria-label="Turn voice on"><span class="mi"></span><span class="bars"><i></i><i></i><i></i><i></i></span></button>
+      </form>
+      <div class="vhint" id="vhint"></div>
+    </div>
+
+    <section class="start" id="start">
+      <button class="orb" id="orbBtn" aria-label="Start with voice"></button>
+      <h1>Hi there</h1>
+      <p>Your personal loan, done by talking.<br>SuperAgent does the paperwork.</p>
+      <div class="btns">
+        <button class="btn" id="startVoice"></button>
+        <button class="btn2" id="startText">Start with text</button>
+        <button class="linkb" id="startDemo">Watch an auto-play demo</button>
+      </div>
+      <div class="fine">Concept prototype with synthetic data. Not affiliated with any lender, bank, bureau or government service, and nothing you say or type is sent anywhere.</div>
+    </section>
+
+    <div class="sms" id="sms"></div>
+    <div class="toast" id="toast" role="status"></div>
+    <div id="layer"></div>
+    <div class="homebar"></div>
+  </div></div>
+
+  <aside class="side" aria-label="Behind the screen">
+    <div class="sdh">
+      <h2>Behind the screen</h2>
+      <p>Everything SuperAgent does in the background. The customer sees it as one live line, which then folds into a ✓ chip. Press <b>D</b> to hide this panel.</p>
+      <div class="vinfo" id="vinfo"></div>
+      <div class="pbtns"><button class="pb pri" id="pAuto">▶ Auto-play demo</button><button class="pb" id="pRst">Restart</button></div>
+    </div>
+    <div class="sdb" id="panelBody"></div>
+  </aside>
+</div></div>
+
+<script>
+(function(){'use strict';
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const lakh=n=>n>=100000?'₹'+(+(n/100000).toFixed(2))+' lakh':fmt(n);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const dstr=d=>d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
+const tstr=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+const mask=m=>'+91 ••••••'+String(m).slice(-4);
+function emi(P,r,n){const i=r/1200,f=Math.pow(1+i,n);return Math.ceil(P*i*f/(f-1));}
+function aprOf(net,pays){let lo=0,hi=0.2;const f=i=>pays.reduce((s,p,k)=>s+p/Math.pow(1+i,k+1),0)-net;for(let k=0;k<90;k++){const m=(lo+hi)/2;if(f(m)>0)lo=m;else hi=m;}return Math.round(((lo+hi)/2)*1200*100)/100;}
+function firstEmi(){const t=new Date();let m=t.getMonth()+1,y=t.getFullYear();if(t.getDate()>20)m++;if(m>11){m-=12;y++;}return new Date(y,m,5);}
+function addM(d,n){const x=new Date(d);x.setMonth(x.getMonth()+n);return x;}
+function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstElementChild;}
+
+const I={
+ mic:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+ mic12:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+ send:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+ spk:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+ spkOff:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
+ rst:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
+ list:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+ check:s=>'<svg width="'+(s||10)+'" height="'+(s||10)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ lock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+ shield:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',
+ eye:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>',
+ info:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+ bank:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6M5 10v8M10 10v8M14 10v8M19 10v8M3 20h18"/></svg>',
+ doc:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
+ pin:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+ cam:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10l5-3v10l-5-3"/></svg>',
+ brief:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></svg>',
+ spark:'<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.4L19 9l-5.2 1.6L12 16l-1.8-5.4L5 9l5.2-1.6zM19 14l.9 2.6L22 17.5l-2.1.8L19 21l-.9-2.7L16 17.5l2.1-.9z"/></svg>',
+ chev:'<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>',
+ down:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>',
+ close:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+ msg:'<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.8 2 11.5c0 2.6 1.4 4.9 3.6 6.4L5 21l3.6-2c1.1.3 2.2.5 3.4.5 5.5 0 10-3.8 10-8.5S17.5 3 12 3z"/></svg>'
+};
+
+/* ================= synthetic data (all demo) ================= */
+const D={
+ experian:{name:'RIYA SHARMA',first:'Riya',pan:'BXZPS4821M',dob:'14 Aug 1994',gender:'Female',pin:'411038',city:'Pune'},
+ banks:[{id:'hdfc',name:'HDFC Bank',short:'HDFC',acc:'4521',color:'#004C8F'},{id:'icici',name:'ICICI Bank',short:'ICICI',acc:'9087',color:'#AE282E'}],
+ aa:{salary:85000,abb:142300,last:118450,months:6,employer:'Acme Technologies Pvt Ltd'},
+ cibil:768,maxAmt:480000,minAmt:40000,rate:13.75,feePct:0.0236,stamp:200,
+ address:'Flat 12, Sample Residency, Kothrud, Pune 411038',
+ offices:['Hinjawadi Phase 1, Pune','Magarpatta City, Pune'],
+ tenures:[24,36,48,60]
+};
+const maskPan=p=>p.slice(0,3)+'••'+p.slice(5,7)+'••'+p.slice(9);
+function salaryRows(){const out=[];const t=new Date();for(let k=6;k>=1;k--){const d=new Date(t.getFullYear(),t.getMonth()-k+1,1);out.push([d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear(),'NEFT · ACME TECHNOLOGIES · SALARY',fmt(D.aa.salary)]);}return out;}
+function quote(P,n){const e=emi(P,D.rate,n),fee=Math.round(P*D.feePct),net=P-fee-D.stamp,total=e*n;return {P:P,n:n,emi:e,fee:fee,stamp:D.stamp,net:net,total:total,interest:total-P,apr:aprOf(net,Array(n).fill(e)),rate:D.rate};}
+
+/* ================= understanding what the customer says ================= */
+const NUMW={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,
+ ek:1,teen:3,char:4,chaar:4,paanch:5,panch:5,chhe:6,saat:7,aath:8,nau:9,das:10,bees:20,tees:30,chalis:40,pachas:50,dedh:1.5,dhai:2.5,dhaai:2.5};
+const MULW={hundred:100,sau:100,thousand:1000,hazar:1000,hazaar:1000,k:1000,lakh:100000,lakhs:100000,lac:100000,lacs:100000,l:100000,crore:10000000,cr:10000000};
+function wordsToNum(t){
+  let s=' '+String(t).toLowerCase().replace(/\b(one|two|three|four|five|\d+)\s+and\s+a\s+half\b/g,(m,a)=>String((NUMW[a]!=null?NUMW[a]:Number(a))+0.5))
+   .replace(/rs\.?(?=[\s\d]|$)|\binr\b|\brupees?\b|₹/g,' ').replace(/,(?=\d{2,3}\b)/g,'').replace(/-/g,' ')+' ';
+  s=s.replace(/(\d+(?:\.\d+)?)\s*(k|l|lakhs?|lacs?|crores?|cr|thousand|hazaa?r|hundred)\b/g,(m,a,b)=>{const u=MULW[b]||MULW[b.replace(/s$/,'')]||1;return ' '+Math.round(parseFloat(a)*u)+' ';});
+  const out=[];let cur=null,acc=0;const flush=()=>{if(cur!==null||acc)out.push(String(Math.round(acc+(cur||0))));cur=null;acc=0;};
+  for(const w of s.split(/\s+/)){
+    if(w in NUMW){cur=(cur||0)+NUMW[w];continue;}
+    if(w in MULW&&w.length>1&&(cur!==null||acc)){const m=MULW[w];if(m>=1000){acc+=(cur||1)*m;cur=null;}else cur=(cur||1)*m;continue;}
+    flush();out.push(w);}
+  flush();return out.join(' ').replace(/\s+/g,' ').trim();
+}
+function parseAmount(t){const nums=(wordsToNum(t).match(/\d+(?:\.\d+)?/g)||[]).map(Number);let v=nums.find(n=>n>=10000);
+  if(v==null){const sm=nums.find(n=>n>0&&n<=60);if(sm!=null)v=sm*100000;}
+  if(v==null||v<10000||v>10000000)return null;return Math.round(v/1000)*1000;}
+const DIG={zero:'0',oh:'0',o:'0',one:'1',two:'2',three:'3',four:'4',five:'5',six:'6',seven:'7',eight:'8',nine:'9',ek:'1',do:'2',teen:'3',char:'4',paanch:'5',chhe:'6',saat:'7',aath:'8',nau:'9',to:'2',too:'2',for:'4',ate:'8'};
+function digitsIn(raw){let out='',mult=1;String(raw||'').toLowerCase().replace(/[+\-–()\/.,:;!?]/g,' ').split(/\s+/).filter(Boolean).forEach(w=>{
+  if(w==='double'){mult=2;return;}if(w==='triple'){mult=3;return;}
+  const d=/^\d+$/.test(w)?w:DIG[w];if(!d){mult=1;return;}out+=(mult>1&&d.length===1)?d.repeat(mult):d;mult=1;});return out;}
+function phoneFrom(raw){let x=digitsIn(raw);if(x.length===12&&x.startsWith('91'))x=x.slice(2);if(x.length===11&&x.startsWith('0'))x=x.slice(1);return /^[6-9]\d{9}$/.test(x)?x:null;}
+function titleCase(s){return String(s).toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());}
+const YES=/\b(yes|yeah|yep|yup|haan|ha|ok|okay|sure|correct|right|go ahead|proceed|continue|confirm|done|verify|fine|please|that'?s right)\b/i;
+const FAQ=[
+ [/account aggregator|\baa\b|onemoney/i,'Account Aggregator is an RBI-licensed way to share your bank statement digitally, with your consent. No money moves, and we never see your bank login.'],
+ [/cibil|credit score|credit report/i,'With your consent we check your credit report. A good score helps, but it doesn\'t guarantee approval on its own.'],
+ [/kfs|key facts/i,'The Key Facts Statement puts your rate, APR, fees and EMIs in one place, so you know the full cost before you accept.'],
+ [/super ?agent/i,'SuperAgent fetches and checks your details for you from Experian, your bank and other sources. You only confirm the important steps.'],
+ [/video kyc|vkyc/i,'Video KYC is a short recorded call where a KYC officer checks your face, Aadhaar and PAN.'],
+ [/safe|secure|privacy|my data/i,'Your data is used only for this application, with your consent. Codes only confirm it\'s you.'],
+ [/\bapr\b/i,'APR is the yearly cost of the loan including fees, worked out on the amount you actually receive.']
+];
+const isQuestion=t=>/\?\s*$/.test(t)||/^(what|how|why|when|is|are|can|will|do|does|kya|kaise)\b/i.test(t.trim());
+
+/* ================= voice: speaking ================= */
+const CAN_SPEAK='speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined';
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const S={voice:false,speak:true,auto:false,started:false,agent:false,micBlocked:false};
+let SPK=0,speaking=false;const KEEP=[];
+function sayable(t){return String(t||'').replace(/<[^>]+>/g,' ')
+  .replace(/₹\s?(\d[\d,]*(?:\.\d+)?)(\s*lakh)?/g,(m,n,l)=>{let v=Number(n.replace(/,/g,''));if(l)v*=100000;if(v>=100000)return +(v/100000).toFixed(2)+' lakh rupees';return Math.round(v).toLocaleString('en-US')+' rupees';})
+  .replace(/\bp\.\s?a\./gi,'per year').replace(/\bEMIs?\b/g,m=>m==='EMIs'?'E M Is':'E M I').replace(/\bKFS\b/g,'K F S').replace(/\bAPR\b/g,'A P R').replace(/\bPAN\b/g,'pan').replace(/\bCIBIL\b/g,'sibil')
+  .replace(/\bHDFC\b/g,'H D F C').replace(/\bICICI\b/g,'I C I C I').replace(/\bKYC\b/g,'K Y C').replace(/SuperAgent/g,'Super Agent').replace(/[·•|]/g,', ').replace(/\s+/g,' ').trim();}
+function speak(text){
+  return new Promise(res=>{
+    if(!S.speak||!CAN_SPEAK||!text){setTimeout(res,150);return;}
+    stopListening();
+    const g=++SPK;let fin=false;
+    const done=()=>{if(fin)return;fin=true;clearInterval(wd);if(g===SPK){speaking=false;micUi();}res();};
+    try{speechSynthesis.cancel();}catch(e){}
+    const v=pickVoice();
+    const parts=(sayable(text).match(/[^.!?]+[.!?]*/g)||[text]).map(x=>x.trim()).filter(Boolean);let left=parts.length;
+    speaking=true;micUi();KEEP.length=0;
+    parts.forEach(p=>{const u=new SpeechSynthesisUtterance(p);u.lang=v?v.lang:'en-IN';u.rate=RATE;u.pitch=VOICE_INDIAN?1.05:1.15;if(v)u.voice=v;u.onend=u.onerror=()=>{if(--left<=0)done();};KEEP.push(u);try{speechSynthesis.speak(u);}catch(e){done();}});
+    let ticks=0;const wd=setInterval(()=>{ticks++;if(g!==SPK){done();return;}if(ticks>2&&!speechSynthesis.speaking&&!speechSynthesis.pending)done();if(ticks>60)done();},400);
+  });
+}
+/* prefer an Indian-English female voice: Edge "Neerja", macOS/iOS "Veena"/"Isha", Windows "Heera", Android/Chrome en-IN, then Google Hindi (Indian accent) */
+const RATE=1.25;let VOICE=null,VOICE_INDIAN=false,VOICE_NOTE='Loading voices…';
+const FEMALE_IN=[/neerja/i,/swara/i,/veena/i,/isha/i,/heera/i,/kalpana/i,/aditi/i,/raveena/i,/lekha/i,/kajal/i,/priya/i,/ananya/i];
+const MALE=/rishi|ravi|prabhat|hemant|madhur|aarav|kunal|arjun|\bmale\b/i;
+function pickVoice(){
+  if(!CAN_SPEAK)return null;if(VOICE)return VOICE;
+  const vs=speechSynthesis.getVoices();if(!vs.length)return null;
+  let v=null;for(const r of FEMALE_IN){v=vs.find(x=>r.test(x.name)&&/(en|hi)[-_]IN/i.test(x.lang));if(v)break;}
+  if(!v)v=vs.find(x=>/en[-_]IN/i.test(x.lang)&&/female|woman/i.test(x.name))||vs.find(x=>/en[-_]IN/i.test(x.lang)&&!MALE.test(x.name));
+  if(!v)v=vs.find(x=>/hi[-_]IN/i.test(x.lang)&&!MALE.test(x.name));
+  VOICE_INDIAN=!!v;
+  if(!v)v=vs.find(x=>/^en/i.test(x.lang)&&/female|samantha|karen|serena|moira|tessa|zira|susan|hazel|libby|sonia|aria|jenny/i.test(x.name))||vs.find(x=>/^en/i.test(x.lang))||vs[0];
+  VOICE=v;VOICE_NOTE=v?(v.name+' · '+v.lang+(VOICE_INDIAN?'':' (no Indian female voice on this device)')):'No voice available';
+  try{panel();}catch(e){}return v;}
+if(CAN_SPEAK){try{speechSynthesis.getVoices();speechSynthesis.addEventListener('voiceschanged',()=>{VOICE=null;pickVoice();});}catch(e){}}
+function stopSpeaking(){SPK++;speaking=false;try{speechSynthesis.cancel();}catch(e){}micUi();}
+
+/* ================= voice: listening ================= */
+let rec=null,listening=false,emptyRuns=0;
+const canListen=()=>!!SR&&window.isSecureContext&&!S.micBlocked;
+function listenSoon(ms){setTimeout(listen,ms==null?250:ms);}
+function listen(){
+  if(!S.voice||!CUR||listening||speaking||!canListen()||S.auto)return;
+  const c=CUR;const r=new SR();r.lang='en-IN';r.interimResults=true;r.continuous=true;
+  let all='',timer=null,failed=null;
+  const endSoon=ms=>{clearTimeout(timer);timer=setTimeout(()=>{try{r.stop();}catch(e){}},ms);};
+  r.onstart=()=>{listening=true;micUi();endSoon(9000);};
+  r.onresult=e=>{let f='',m='';for(let i=0;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)f+=' '+t;else m+=t;}
+    all=(f+' '+m).replace(/\s+/g,' ').trim();inp.value=all;sendUi();
+    const enough=c.doneWhen&&c.doneWhen(all);endSoon(enough?450:(c.long?2600:1400));};
+  r.onerror=e=>{failed=e.error;if(/not-allowed|service-not-allowed|audio-capture/.test(e.error)){S.micBlocked=true;toast('The microphone is blocked in this view. Tap a suggestion or type; replies are still spoken.');}};
+  r.onend=()=>{clearTimeout(timer);listening=false;rec=null;const said=all.trim();inp.value='';sendUi();micUi();
+    if(said){emptyRuns=0;onInput(said,'voice');return;}
+    if(failed==='aborted')return;
+    if(++emptyRuns>=6){S.voice=false;emptyRuns=0;micUi();hint('Voice paused. Tap the mic when you\'re ready.');return;}
+    listenSoon(500);};
+  rec=r;try{r.start();}catch(e){listening=false;rec=null;}
+}
+function stopListening(){if(rec){try{rec.abort();}catch(e){}}rec=null;listening=false;micUi();}
+
+/* ================= UI shell ================= */
+const thread=$('#thread'),inp=$('#inp'),micBtn=$('#micBtn'),sugg=$('#sugg');
+$('#micBtn .mi').innerHTML=I.mic;$('#sendBtn').innerHTML=I.send;$('#rstBtn').innerHTML=I.rst;$('#actBtn').innerHTML=I.list;
+$('#startVoice').innerHTML=I.mic.replace(/22/g,'18')+' Start with voice';
+function micUi(){
+  micBtn.classList.toggle('on',S.voice);micBtn.classList.toggle('listen',listening);micBtn.classList.toggle('talk',speaking);
+  micBtn.setAttribute('aria-label',S.voice?'Turn voice off':'Turn voice on');
+  inp.placeholder=listening?'Listening… just say it':speaking?'Speaking…':S.voice?'Voice on · I\'ll listen after I speak':'Type, or tap the mic and talk';
+  const h=$('#vhint');
+  if(S.auto){h.textContent='Auto-play demo · answers are simulated';h.className='vhint live';}
+  else if(listening){h.textContent='Listening…';h.className='vhint live';}
+  else if(S.voice&&S.micBlocked){h.textContent='Mic blocked here · replies are spoken';h.className='vhint';}
+  else h.className='vhint',h.textContent=h.dataset.keep||'';
+  $('#spkBtn').innerHTML=S.speak?I.spk:I.spkOff;$('#spkBtn').classList.toggle('on',S.speak);$('#spkBtn').setAttribute('aria-pressed',String(S.speak));
+}
+function hint(t){const h=$('#vhint');h.dataset.keep=t;micUi();setTimeout(()=>{if(h.dataset.keep===t){h.dataset.keep='';micUi();}},5000);}
+function sendUi(){$('#sendBtn').classList.toggle('show',!!inp.value.trim()&&!listening);}
+function scrollDown(){requestAnimationFrame(()=>thread.scrollTo({top:thread.scrollHeight,behavior:'smooth'}));}
+function add(node){thread.appendChild(node);scrollDown();return node;}
+let toastT=null;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);}
+function sms(from,text){const s=$('#sms');s.innerHTML='<span class="ai">'+I.msg+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1"><b><span>'+esc(from)+'</span><span style="color:var(--dim);font-weight:500">now</span></b><span>'+esc(text)+'</span></span>';s.classList.add('show');setTimeout(()=>s.classList.remove('show'),3200);}
+function setSugg(list){sugg.innerHTML='';(list||[]).forEach(t=>{const b=el('<button class="sg" type="button"></button>');b.textContent=t;b.onclick=()=>onInput(t,'tap');sugg.appendChild(b);});}
+let statusBusy=0;
+function setStatus(t){const h=$('#hst');if(t){h.classList.add('work');$('#hstT').textContent=t;}else{h.classList.remove('work');$('#hstT').textContent=S.agent?'SuperAgent is on':'Online';}}
+
+/* ================= flow control ================= */
+let RUN=0,CUR=null,DEMO_T=null;const ABORT={abort:true};
+function guard(id){if(id!==RUN)throw ABORT;}
+async function pause(ms){const id=RUN;await sleep(ms);guard(id);}
+async function bot(text,o){o=o||{};const id=RUN;
+  const ty=add(el('<div class="typing" aria-hidden="true"><i></i><i></i><i></i></div>'));
+  await sleep(S.auto?380:480);ty.remove();guard(id);
+  const p=add(el('<p class="say"></p>'));p.innerHTML=o.html||esc(text);
+  await speak(o.speech||text);guard(id);}
+function me(text,via){const b=el('<div class="me"></div>');
+  if(via==='voice'||via==='demo')b.innerHTML='<span class="via">'+I.mic12+(via==='demo'?' Voice · demo':' Voice')+'</span>';
+  b.appendChild(document.createTextNode(text));add(b);}
+/* wait for the customer: by voice, typing, a suggestion, or a tap inside the active card */
+function wait(o){const id=RUN;return new Promise(res=>{CUR=Object.assign({},o,{res:res,id:id});setSugg(o.chips||[]);micUi();if(S.auto)scheduleDemo();else listenSoon();}).then(v=>{guard(id);return v;});}
+function settle(v){if(!CUR)return;const c=CUR;CUR=null;clearTimeout(DEMO_T);setSugg([]);stopListening();c.res(v);}
+async function onInput(text,via){
+  text=String(text||'').trim();if(!text)return;inp.value='';sendUi();
+  me(text,via);stopListening();
+  const c=CUR;if(!c){return;}
+  const v=c.parse?c.parse(text):null;
+  if(v!=null&&v!==false){settle(v);return;}
+  try{
+    const f=isQuestion(text)&&FAQ.find(x=>x[0].test(text));
+    if(f)await bot(f[1]);
+    else if(c.tapRe&&c.tapRe.test(text))await bot(c.tapMsg);
+    else await bot(c.retry||'Sorry, I didn\'t catch that. You can also tap one of the options.');
+  }catch(e){return;}
+  if(CUR===c){if(S.auto)scheduleDemo();else listenSoon();}
+}
+function scheduleDemo(){clearTimeout(DEMO_T);const c=CUR;if(!c||!S.auto||c.demo==null)return;
+  DEMO_T=setTimeout(()=>{if(CUR!==c||!S.auto)return;if(typeof c.demo==='function')c.demo();else onInput(c.demo,'demo');},c.demoDelay||1500);}
+
+/* background work, shown upfront as one live line, then folded into a ✓ chip */
+const LOG=[];
+async function bg(src,steps,chip,details,o){
+  o=o||{};const id=RUN;const t0=Date.now();
+  const entry={at:new Date(),src:src,text:steps[0][0],status:'run',chip:chip,details:details||[],o:o};LOG.unshift(entry);panel();
+  const line=add(el('<div class="live"><span class="spin"></span><span class="lt shim"></span>'+(o.fetch?'<button class="rlink" type="button">View records</button>':'<span class="src"></span>')+'</div>'));
+  if(o.fetch)line.querySelector('.rlink').onclick=()=>openRecords(entry);else line.querySelector('.src').textContent=src;
+  for(const st of steps){line.querySelector('.lt').textContent=st[0];entry.text=st[0];setStatus(st[0]);panel();await sleep(S.auto?st[1]*0.8:st[1]);guard(id);}
+  line.remove();entry.status='done';entry.text=chip;entry.ms=Date.now()-t0;entry.doneAt=new Date();setStatus(null);panel();
+  if(REC_OPEN===entry)openRecords(entry,true);
+  addChip(chip,src,details,entry);
+}
+function you(src,text){LOG.unshift({at:new Date(),src:src,text:text,status:'you'});panel();}
+function addChip(text,src,details,entry){
+  let row=thread.lastElementChild;if(!row||!row.classList.contains('bgrow'))row=add(el('<div class="bgrow"></div>'));
+  const fetch=entry&&entry.o.fetch;
+  const c=el('<button class="chip" type="button"><span class="ok">'+I.check(9)+'</span><span class="ct"></span>'+(fetch?'<span class="sep">·</span><span class="rl">View records</span>':'')+'</button>');
+  c.querySelector('.ct').textContent=text;c.onclick=()=>fetch?openRecords(entry):openDetails(text,src,details||[]);
+  if(fetch)c.setAttribute('aria-label',text+'. View records fetched from '+src);row.appendChild(c);scrollDown();}
+function card(html){return add(el('<div class="card">'+html+'</div>'));}
+function bind(node,map){node.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b||b.disabled||!node.isConnected)return;const f=map[b.dataset.a];if(f)f(b,e);});}
+function fold(node,text,src,details){node.classList.add('out');setTimeout(()=>node.remove(),180);addChip(text,src,details);}
+
+/* ================= layers: sheet, alert, details ================= */
+const layer=$('#layer');
+function openSheet(html,o){o=o||{};REC_OPEN=null;layer.innerHTML='<div class="scrim"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>'+html+'</div>';
+  const sc=layer.querySelector('.scrim'),sh=layer.querySelector('.sheet');requestAnimationFrame(()=>{sc.classList.add('show');sh.classList.add('show');});
+  if(!o.modal)sc.onclick=closeLayer;sh.addEventListener('click',e=>{if(e.target.closest('[data-close]'))closeLayer();});return sh;}
+function openAlert(html){REC_OPEN=null;layer.innerHTML='<div class="scrim"></div><div class="alert" role="alertdialog" aria-modal="true">'+html+'</div>';
+  const sc=layer.querySelector('.scrim'),a=layer.querySelector('.alert');requestAnimationFrame(()=>{sc.classList.add('show');a.classList.add('show');});return a;}
+function closeLayer(){REC_OPEN=null;const sc=layer.querySelector('.scrim'),x=layer.querySelector('.sheet,.alert');if(!x)return;sc&&sc.classList.remove('show');x.classList.remove('show');setTimeout(()=>{if(layer.querySelector('.show')==null)layer.innerHTML='';},300);}
+let REC_OPEN=null;
+function openRecords(e,refresh){
+  const sh0=layer.querySelector('.sheet.show');
+  if(refresh&&(!sh0||REC_OPEN!==e))return;
+  const run=e.status==='run',o=e.o;
+  const rows=e.details.map(r=>'<div class="rr"><span>'+esc(r[0])+'</span><b>'+(run?'<i class="rsk"></i>':esc(r[1]))+'</b><em>'+(run?'<span class="spin" style="width:13px;height:13px"></span>':'<span class="okd">'+I.check(10)+'</span>')+'</em></div>').join('');
+  let table='';
+  if(o.table){table='<div class="sl2">'+esc(o.table.title)+'</div>'+(run?'<div class="note">Fetching…</div>':'<table class="txn"><tr>'+o.table.cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr>'+o.table.rows.map(r=>'<tr>'+r.map(c=>'<td>'+esc(c)+'</td>').join('')+'</tr>').join('')+'</table>');}
+  const raw={source:e.src,request:o.request||null,status:run?'in_progress':'success',fetched_at:run?null:(e.doneAt||new Date()).toISOString(),records:Object.fromEntries(e.details.map(r=>[r[0].toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''),run?null:r[1]]))};
+  const html='<div class="sht"><div><h2>Records from '+esc(e.src)+'</h2><p>'+(run?'<span class="shim">Fetching now…</span>':'Fetched at '+tstr(e.doneAt||new Date())+(e.ms?' · took '+(e.ms/1000).toFixed(1)+'s':''))+'</p></div><button class="ib" data-close aria-label="Close" style="margin:-6px -8px 0 0">'+I.close+'</button></div>'+
+    '<div class="meta"><span>Source</span><b>'+esc(e.src)+'</b><span>Why</span><b>'+esc(o.purpose||'For this loan application')+'</b><span>Allowed by</span><b>'+esc(o.basis||'Your consent')+'</b></div>'+
+    '<div class="sl2">'+e.details.length+' records '+(run?'requested':'fetched')+'</div><div class="recs">'+rows+'</div>'+table+
+    '<details class="more"><summary>See raw response '+I.down+'</summary><pre class="raw">'+esc(JSON.stringify(raw,null,2))+'</pre></details>'+
+    '<div class="note">Synthetic demo data from a mock service. Sensitive numbers are masked.</div><button class="btn" data-close>Close</button>';
+  if(refresh){const g=sh0.scrollTop;sh0.innerHTML='<div class="grab"></div>'+html;sh0.scrollTop=g;return;}
+  openSheet(html);REC_OPEN=e;
+}
+function openDetails(title,src,rows){
+  openSheet('<div class="sht"><div><h2>'+esc(title)+'</h2><p>Done in the background by SuperAgent · source: '+esc(src)+'</p></div><button class="ib" data-close aria-label="Close" style="margin:-6px -8px 0 0">'+I.close+'</button></div>'+
+   (rows.length?'<div class="card" style="box-shadow:none;padding:4px 14px;gap:0"><div class="kvs">'+rows.map(r=>'<div class="kv"><span>'+esc(r[0])+'</span><b>'+esc(r[1])+'</b></div>').join('')+'</div></div>':'')+
+   '<div class="note">Synthetic demo data from a mock service.</div><button class="btn" data-close>Got it</button>');}
+
+/* ================= reusable steps ================= */
+async function otpStep(o){
+  const id=RUN;
+  await bot(o.say);
+  const c=card('<div class="ch"><span class="ci">'+I.lock+'</span><div><b>'+esc(o.title)+'</b><span>Sent to '+esc(o.to)+'</span></div></div>'+
+    '<div class="otp" aria-label="One-time code">'+'<i></i>'.repeat(6)+'</div><div class="af">Waiting for the SMS…</div>'+
+    '<ul class="trust"><li>'+I.shield+'<span>Sent by <b>'+esc(o.sender)+'</b></span></li><li>'+I.shield+'<span>'+esc(o.why)+'</span></li><li>'+I.shield+'<span>We only read this one code, never your other messages.</span></li></ul>'+
+    '<button class="btn" data-a="go" disabled>'+esc(o.cta||'Verify')+'</button>');
+  const code=String(100000+Math.floor(Math.random()*899999)).split('');
+  (async()=>{await sleep(900);if(id!==RUN||!c.isConnected)return;sms(o.sender,code.join('')+' is your one-time code. Don\'t share it with anyone.');
+    await sleep(700);const bx=c.querySelectorAll('.otp i');for(let k=0;k<6;k++){if(id!==RUN||!c.isConnected)return;bx[k].textContent=code[k];bx[k].classList.add('f');await sleep(80);}
+    const af=c.querySelector('.af');af.className='af ok';af.innerHTML=I.check(12)+' Autofilled from SMS <span class="tag">Demo</span>';c.querySelector('[data-a=go]').disabled=false;})();
+  bind(c,{go:()=>settle('go')});
+  await wait({parse:t=>YES.test(t)?'go':null,chips:[o.cta||'Verify'],retry:'Say "'+(o.cta||'verify').toLowerCase()+'" when you\'re ready, or tap the button.',demo:o.cta||'Verify',demoDelay:2600});
+  you(o.src,'Customer confirmed the code');
+  const b=c.querySelector('[data-a=go]');b.disabled=true;b.innerHTML='<span class="spin" style="width:16px;height:16px"></span> Verifying';
+  await pause(650);fold(c,o.chip,o.src,[['Sent to',o.to],['Sent by',o.sender],['Purpose',o.why]]);
+}
+async function consentStep(o){
+  const c=card((o.head||'')+'<label class="cons"><input type="checkbox" id="'+o.id+'"><span>'+esc(o.text)+'</span></label><button class="btn" data-a="go" disabled>'+esc(o.cta)+'</button>');
+  const box=c.querySelector('input');box.onchange=()=>{c.querySelector('[data-a=go]').disabled=!box.checked;};
+  bind(c,{go:()=>settle('go')});
+  await wait({parse:()=>null,tapRe:/\b(yes|agree|ok|okay|sure|allow|share|accept|go ahead|haan|proceed|continue|tick|i do)\b/i,
+    tapMsg:'Consent needs your own tap: tick the box, then tap '+o.cta+'.',retry:'When you\'re ready, tick the box and tap '+o.cta+'.',
+    demo:()=>{box.checked=true;box.onchange();c.querySelector('.cons').classList.add('nudge');setTimeout(()=>settle('go'),800);},demoDelay:1700});
+  you('Consent record',o.log);fold(c,o.chip,'Consent record',[['You agreed to',o.text],['Recorded at',tstr(new Date())]]);
+}
+
+/* ================= the journey ================= */
+const STAGES=['Sign in with mobile + OTP','Choose SuperAgent','Account Aggregator','CIBIL consent','Final offer','Key Facts Statement','Aadhaar + salary slip','Confirm address','Video KYC','Work details by voice','Auto-pay via UPI AutoPay','Disbursal within 24 hours'];
+let STAGE=-1;function stage(i){STAGE=i;panel();}
+
+async function journey(){
+  const X={};
+  stage(-1);
+  await bot('Hi there, what can I do for you?');
+  await wait({chips:['I want a personal loan'],parse:t=>t.length>1?true:null,demo:'I want a personal loan'});
+
+  stage(0);
+  await bot('Sure, I can help you with a personal loan. First, let\'s sign you in. What\'s your mobile number?');
+  X.mobile=await wait({chips:['98765 43210'],parse:phoneFrom,long:true,doneWhen:t=>!!phoneFrom(t),
+    retry:'I need a 10-digit mobile number starting with 6, 7, 8 or 9. Say it digit by digit.',demo:'nine eight seven six five four three two one zero',demoDelay:1300});
+  await otpStep({say:'Thanks. I\'ve sent a code to '+mask(X.mobile)+'. It fills in by itself; say verify when you\'re ready.',speech:'',
+    title:'Enter the code we sent',to:mask(X.mobile),sender:'Loan Assistant (LNASST)',why:'This code only signs you in. It isn\'t consent or approval.',cta:'Verify',chip:'Signed in · '+mask(X.mobile),src:'OTP gateway'});
+  await bg('Experian',[['Fetching your details from Experian',1500],['Matching them to your mobile number',900]],'Experian · 5 details fetched',
+    [['Name','Riya Sharma'],['PAN',maskPan(D.experian.pan)],['Date of birth',D.experian.dob],['Gender',D.experian.gender],['PIN code',D.experian.pin+' · '+D.experian.city]],
+    {fetch:true,purpose:'Pre-fill your application so you don\'t have to type',basis:'Your verified mobile number',request:{mobile:mask(X.mobile)}});
+  const N=D.experian.first;
+
+  await bot('Hi '+N+', I can help you with a personal loan. How much do you need?');
+  X.amount=await wait({chips:['₹1 lakh','₹2 lakh','₹3 lakh','₹5 lakh'],parse:parseAmount,retry:'How much do you need? Say it like "two lakh".',demo:'Two lakh rupees'});
+
+  stage(1);
+  await bot('Got it, '+lakh(X.amount)+'. '+N+', we have two options for you: fill in your details yourself, or let SuperAgent complete this journey for you.');
+  const pc=card('<button class="opt rec" data-a="agent"><b>'+I.spark+' SuperAgent</b><span>I fetch, check and fill everything. You only confirm the key steps.</span><em>Recommended · about 4 minutes</em></button>'+
+    '<button class="opt" data-a="manual"><b>Fill it myself</b><span>Type your details step by step</span></button>');
+  bind(pc,{agent:()=>settle('agent'),manual:()=>settle('manual')});
+  let path;
+  while((path=await wait({chips:['Use SuperAgent','Fill it myself'],parse:t=>/super|agent|you do|for me|automatic|first/i.test(t)?'agent':/manual|myself|fill|second|type/i.test(t)?'manual':null,
+     retry:'Shall SuperAgent do it, or would you rather fill it yourself?',demo:'Let SuperAgent do it'}))==='manual'){
+    await bot('The manual path isn\'t part of this prototype. Shall I let SuperAgent take it from here?');}
+  S.agent=true;$('#saBadge').classList.add('on');setStatus(null);you('Orchestrator','Customer chose SuperAgent');
+  fold(pc,'SuperAgent is on','Orchestrator',[['Path','SuperAgent'],['What it does','Fetches, verifies and fills your details; you confirm key steps']]);
+
+  stage(2);
+  await bot(N+', since you need a loan of '+lakh(X.amount)+', can you share your Account Aggregator access? It lets me create your final loan offer.');
+  await consentStep({id:'cAA',head:'<div class="ch"><span class="ci">'+I.bank+'</span><div><b>Bank + Account Aggregator</b><span>One consent · via OneMoney, RBI-licensed</span></div></div>',
+    text:'I allow the lender to fetch my bank statement through OneMoney, an RBI-licensed Account Aggregator, to assess this loan, and I accept OneMoney\'s terms.',
+    cta:'Share access',chip:'Consent · bank + Account Aggregator',log:'Combined bank + AA consent given'});
+  await bot('Please hold on, I\'m verifying your bank details.');
+  await bg('OneMoney AA',[['Connecting to OneMoney',1200]],'OneMoney · connected',[['Account Aggregator','OneMoney (demo)'],['Linked mobile',mask(X.mobile)]]);
+  await otpStep({say:'OneMoney has sent you a code. It\'s filled in; say go ahead.',title:'Code from OneMoney',to:mask(X.mobile),sender:'OneMoney (Account Aggregator)',
+    why:'Logs you in to OneMoney to find accounts linked to your number.',cta:'Go ahead',chip:'OneMoney · verified',src:'OneMoney AA'});
+  await bg('OneMoney AA',[['Finding bank accounts linked to your number',1600]],'2 bank accounts found',D.banks.map(b=>[b.name,'Savings ••'+b.acc]),{fetch:true,purpose:'Find bank accounts linked to your number',basis:'Your Account Aggregator consent',request:{mobile:mask(X.mobile)}});
+  await bot('Here are the 2 banks available for you. Do you want to select HDFC or ICICI Bank?');
+  const bc=card(D.banks.map(b=>'<button class="bank" data-a="'+b.id+'"><span class="bl" style="background:'+b.color+'">'+b.short+'</span><span><b>'+b.name+'</b><span>Savings ••'+b.acc+'</span></span>'+I.chev+'</button>').join(''));
+  bind(bc,{hdfc:()=>settle('hdfc'),icici:()=>settle('icici')});
+  const bankId=await wait({chips:['HDFC','ICICI'],parse:t=>/hdfc|h\s?d\s?f\s?c|first/i.test(t)?'hdfc':/icici|i\s?c\s?i\s?c\s?i|second/i.test(t)?'icici':null,retry:'HDFC or ICICI?',demo:'HDFC'});
+  X.bank=D.banks.find(b=>b.id===bankId);
+  fold(bc,X.bank.short+' ••'+X.bank.acc+' selected','OneMoney AA',[['Bank',X.bank.name],['Account','Savings ••'+X.bank.acc]]);
+  await otpStep({say:X.bank.short+' Bank has sent a code to approve sharing. It\'s filled in; say go ahead.',title:'Code from '+X.bank.name,to:mask(X.mobile),sender:X.bank.name,
+    why:'Approves sharing your statement, only for this loan application.',cta:'Go ahead',chip:X.bank.short+' · sharing approved',src:X.bank.name+' via AA'});
+  await bot('Thanks. I\'m verifying your bank statement now.');
+  await bg(X.bank.short+' via AA',[['Fetching 6 months of your '+X.bank.short+' statement',1600],['Reading salary credits and balances',1400]],'Bank statement · 6 months read',
+    [['Account','Savings ••'+X.bank.acc],['Name on account','Riya Sharma'],['PAN on account',maskPan(D.experian.pan)],['Gender','Female'],['Salary / income',fmt(D.aa.salary)+' a month · credited on the 1st'],['Average bank balance (ABB)',fmt(D.aa.abb)],['Last bank balance',fmt(D.aa.last)],['Salary from',D.aa.employer],['Existing EMIs','None found']],{fetch:true,purpose:'Confirm your income and assess this loan',basis:'Your Account Aggregator consent, approved with your '+X.bank.short+' code',request:{bank:X.bank.name,account:'••'+X.bank.acc,period:'Last 6 months'},table:{title:'Salary credits found',cols:['Date','Description','Amount'],rows:salaryRows()}});
+  await bg('NSDL',[['Verifying your PAN with NSDL',1300]],'NSDL · PAN verified',[['PAN',maskPan(D.experian.pan)],['Status','Valid · individual'],['Name match','Matches bank and Experian']],{fetch:true,purpose:'Confirm your PAN is valid and matches your name',basis:'Required for KYC',request:{pan:maskPan(D.experian.pan)}});
+  await bot('Done. I can see your salary of '+fmt(D.aa.salary)+' coming in every month.');
+
+  stage(3);
+  await bot('One last check before your offer: may I look at your credit report?');
+  await consentStep({id:'cCIBIL',head:'<div class="ch"><span class="ci">'+I.doc+'</span><div><b>Credit report</b><span>TransUnion CIBIL</span></div></div>',
+    text:'I authorise the lender to obtain my credit report from TransUnion CIBIL to assess this loan.',cta:'Allow',chip:'Consent · CIBIL',log:'CIBIL consent given'});
+  await bg('TransUnion CIBIL',[['Checking your credit report',1500]],'CIBIL score 768',[['Score','768'],['Active loans','None'],['Enquiries, last 90 days','1'],['Missed payments','None']],{fetch:true,purpose:'Check your credit history for this loan',basis:'Your CIBIL consent',request:{pan:maskPan(D.experian.pan)}});
+  await bg('Eligibility engine',[['Running eligibility checks',1200],['Building your final offer',1200]],'Eligible up to '+lakh(D.maxAmt),
+    [['Eligible up to',fmt(D.maxAmt)],['Based on','Verified salary, bank balance and credit report'],['Interest rate',D.rate+'% p.a. fixed']]);
+
+  stage(4);
+  X.P=clamp(X.amount,D.minAmt,D.maxAmt);X.n=36;
+  await bot(X.P<X.amount?'Good news, '+N+'. You\'re eligible for up to '+lakh(D.maxAmt)+', so here\'s your final offer at that amount.':'Good news, '+N+'. Here\'s your final offer.');
+  const oc=card('<div></div>');
+  const drawOffer=()=>{const q=quote(X.P,X.n);X.q=q;oc.innerHTML='<div><div class="olab">Your loan</div><div class="oamt">'+fmt(q.P)+'</div><div class="oemi"><b>'+fmt(q.emi)+'</b> a month for '+q.n+' months</div></div>'+
+    '<div class="tens" role="radiogroup" aria-label="Tenure">'+D.tenures.map(n=>'<button class="ten'+(n===q.n?' on':'')+'" role="radio" aria-checked="'+(n===q.n)+'" data-a="t" data-n="'+n+'">'+n+' mo<small>'+fmt(emi(q.P,D.rate,n))+'</small></button>').join('')+'</div>'+
+    '<div class="kvs"><div class="kv"><span>Interest rate</span><b>'+q.rate+'% p.a. fixed</b></div><div class="kv"><span>Processing fee</span><b>'+fmt(q.fee)+'</b></div><div class="kv"><span>You receive</span><b>'+fmt(q.net)+'</b></div></div>'+
+    '<button class="btn" data-a="ok">Confirm offer</button>';};
+  drawOffer();
+  bind(oc,{t:b=>{X.n=Number(b.dataset.n);drawOffer();},ok:()=>settle('ok')});
+  for(;;){
+    const v=await wait({chips:['Confirm offer','Make it 48 months'],parse:t=>{const w=wordsToNum(t);const m=w.match(/(\d+)\s*(months?|mahine|mo\b)/i);if(m){const n=+m[1];return D.tenures.reduce((a,b)=>Math.abs(b-n)<Math.abs(a-n)?b:a);}
+        const y=w.match(/(\d+)\s*(years?|saal)/i);if(y){const n=+y[1]*12;return D.tenures.reduce((a,b)=>Math.abs(b-n)<Math.abs(a-n)?b:a);}
+        return /confirm|looks good|accept|go ahead|yes|okay|\bok\b|done|proceed|perfect/i.test(t)?'ok':null;},
+      retry:'Say "confirm", or ask for a different tenure, like 48 months.',demo:'Confirm offer'});
+    if(v==='ok')break;
+    X.n=v;drawOffer();await bot('Updated: '+X.n+' months, EMI '+fmt(X.q.emi)+'.');
+  }
+  you('Offer service','Customer confirmed '+fmt(X.q.P)+' for '+X.n+' months');
+  fold(oc,'Offer · '+lakh(X.q.P)+' · '+X.n+' months · EMI '+fmt(X.q.emi),'Offer service',[['Loan',fmt(X.q.P)],['Tenure',X.n+' months'],['EMI',fmt(X.q.emi)],['Rate',X.q.rate+'% p.a.'],['You receive',fmt(X.q.net)]]);
+
+  stage(5);
+  const kfsId='KFS-'+Math.floor(100000+Math.random()*899999);const q=X.q;const fe=firstEmi();
+  await bg('KFS service',[['Generating your Key Facts Statement',1300]],'KFS generated · '+kfsId,[['Reference',kfsId],['For quote',fmt(q.P)+' · '+q.n+' months']]);
+  await bot('Here\'s your Key Facts Statement. Please read it, tick the box and accept.');
+  await consentStep({id:'cKFS',head:'<div class="ch"><span class="ci">'+I.doc+'</span><div><b>Key Facts Statement</b><span>'+kfsId+'</span></div></div>'+
+    '<div class="kvs">'+[['Loan amount',fmt(q.P)],['Amount you receive',fmt(q.net)],['Interest rate',q.rate+'% p.a. fixed'],['APR (all-in yearly cost)',q.apr+'%'],['EMI',fmt(q.emi)+' × '+q.n],['Total interest',fmt(q.interest)],['First EMI',dstr(fe)]].map(r=>'<div class="kv"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')+'</div>'+
+    '<details class="more"><summary>Charges and other terms '+I.down+'</summary><div class="kvs" style="margin-top:6px">'+[['Processing fee (incl. taxes)',fmt(q.fee)],['Stamp duty',fmt(q.stamp)],['Bounce charge','Up to ₹1,200'],['Penal charge','Up to 36% p.a. on the late EMI'],['Foreclosure','Up to 4.72% of outstanding']].map(r=>'<div class="kv"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')+'</div></details>',
+    text:'I have read and understood the Key Facts Statement.',cta:'Accept',chip:'KFS accepted',log:'KFS '+kfsId+' acknowledged'});
+
+  stage(6);
+  await bot('Next, I need your Aadhaar and latest salary slip. Can you give me access to your photos and files?');
+  const al=openAlert('<div class="ab"><span class="logo" style="width:44px;height:44px"></span><b>Allow “Loan Assistant” to access photos and files on this device?</b><span>Used only to read your Aadhaar and salary slip for this application.</span><span class="denied" style="color:#C41F52;display:none">Access is needed to read your documents.</span></div><button data-a="no">Don\'t allow</button><button class="pri" data-a="yes">Allow</button>');
+  bind(al,{yes:()=>settle('allow'),no:()=>{al.querySelector('.denied').style.display='block';}});
+  await wait({parse:()=>null,tapRe:/\b(yes|allow|ok|okay|sure|go ahead|haan)\b/i,tapMsg:'Device access needs your tap: tap Allow on the prompt.',retry:'Tap Allow on the prompt to share your documents.',demo:()=>settle('allow'),demoDelay:1600});
+  you('Device','Photos and files access allowed');
+  closeLayer();await pause(250);
+  const FILES=[{k:'aad',n:'Aadhaar front.jpg',s:'Today · 1.2 MB',on:1,c:'#F2F5FB',h:'#E8792B'},{k:'slip',n:'Salary slip Oct 2026.pdf',s:'2 Nov · 180 KB',on:1,c:'#fff',h:'#2B5DB6'},{k:'pan',n:'PAN card.jpg',s:'Aug · 900 KB',on:0,c:'#E9EEF8',h:'#163A63'},{k:'bill',n:'Electricity bill.pdf',s:'Oct · 240 KB',on:0,c:'#fff',h:'#10A98C'}];
+  const pk=openSheet('<div class="sht"><div><h2>Choose files</h2><p>SuperAgent picked the two it needs. You can change the selection.</p></div></div>'+
+    '<div class="files">'+FILES.map(f=>'<button class="file'+(f.on?' on':'')+'" data-a="f" data-k="'+f.k+'"><span class="th" style="background:'+f.c+';border:1px solid #ECEAF2"><span style="position:absolute;left:0;right:0;top:0;height:16px;background:'+f.h+';opacity:.85"></span><span style="position:absolute;left:10px;right:24px;top:26px;height:5px;border-radius:3px;background:#D5D9E4"></span><span style="position:absolute;left:10px;right:40px;top:38px;height:5px;border-radius:3px;background:#E1E4EC"></span><span style="position:absolute;left:10px;right:30px;top:50px;height:5px;border-radius:3px;background:#E1E4EC"></span></span><b>'+f.n+'</b><small>'+f.s+'</small><span class="tick">'+I.check(10)+'</span></button>').join('')+'</div>'+
+    '<button class="btn" data-a="share">Share 2 files</button><label class="linkb" style="text-align:center;cursor:pointer">Browse this device instead<input type="file" multiple accept="image/*,application/pdf" style="display:none" id="pickReal"></label>',{modal:true});
+  const cnt=()=>{const n=pk.querySelectorAll('.file.on').length;const b=pk.querySelector('[data-a=share]');b.textContent='Share '+n+' file'+(n===1?'':'s');b.disabled=!n;};
+  bind(pk,{f:b=>{b.classList.toggle('on');cnt();},share:()=>settle('share')});
+  pk.querySelector('#pickReal').onchange=e=>{if(e.target.files.length)settle('share');};
+  await wait({parse:t=>/share|send|upload|done|yes|ok|go ahead/i.test(t)?'share':null,chips:['Share 2 files'],retry:'Tap Share when the right files are selected.',demo:'Share 2 files',demoDelay:1700});
+  closeLayer();
+  await bg('Document reader',[['Reading your Aadhaar',1400]],'Aadhaar · read',[['Name','Riya Sharma'],['Aadhaar','XXXX XXXX 7731'],['Address',D.address]],{fetch:true,purpose:'Read your identity and address',basis:'You shared this file',request:{file:'Aadhaar front.jpg'}});
+  await bg('Document reader',[['Reading your salary slip',1300],['Cross-checking it with your bank statement',900]],'Salary slip · matches bank',[['Employer',D.aa.employer],['Month','October 2026'],['Net pay',fmt(D.aa.salary)+' · matches bank credits']],{fetch:true,purpose:'Confirm your salary',basis:'You shared this file',request:{file:'Salary slip Oct 2026.pdf'}});
+
+  stage(7);
+  await bot('I found this address on your Aadhaar. Is this where you live now?');
+  const ac=card('<div class="addr">'+I.pin+'<span>'+esc(D.address)+'</span></div><div class="row2"><button class="btn2" data-a="no">I\'ve moved</button><button class="btn" data-a="yes">Yes, that\'s right</button></div>');
+  bind(ac,{yes:()=>settle('yes'),no:()=>settle('no')});
+  for(;;){const v=await wait({chips:['Yes, that\'s right','I\'ve moved'],parse:t=>/moved|no\b|not|different|nahi/i.test(t)?'no':YES.test(t)?'yes':null,retry:'Is this your current address? Yes, or I\'ve moved?',demo:'Yes, that\'s right'});
+    if(v==='yes')break;await bot('In this prototype we continue with the Aadhaar address. Shall I confirm it?');}
+  you('Address','Customer confirmed the Aadhaar address');
+  fold(ac,'Address confirmed · Kothrud, Pune','Aadhaar',[['Address',D.address],['Confirmed by','You']]);
+
+  stage(8);
+  await bot('Now a short video KYC call. Our KYC officer will ask you to show your Aadhaar and your PAN card.');
+  const vc=card('<div class="ch"><span class="ci">'+I.cam+'</span><div><b>Video KYC</b><span>About a minute · keep your Aadhaar and PAN handy</span></div></div><ul class="trust"><li>'+I.shield+'<span>The call is recorded, as RBI requires.</span></li><li>'+I.shield+'<span>Your camera is used only during the call.</span></li></ul><button class="btn" data-a="go">Start video KYC</button>');
+  bind(vc,{go:()=>settle('go')});
+  await wait({parse:t=>/start|ready|yes|go|ok|okay|sure|begin/i.test(t)?'go':null,chips:['I\'m ready'],retry:'Say "I\'m ready" or tap Start video KYC.',demo:'I\'m ready'});
+  vc.remove();
+  await vkyc(N);
+  addChip('Video KYC complete','Video KYC (V-CIP)',[['Face match','Passed'],['Aadhaar','Shown and matched'],['PAN','Shown and matched'],['Officer','Priya (demo)']]);
+
+  stage(9);
+  await bot('Almost there. A few quick questions about your work.');
+  const W={emp:null,role:null,exp:null,office:null};
+  const wc=card('<div></div>');
+  const drawW=now=>{wc.innerHTML='<div class="ch"><span class="ci">'+I.brief+'</span><div><b>Work details</b><span>Just answer out loud</span></div></div><div>'+
+    [['emp','Employer'],['role','Role'],['exp','Experience'],['office','Office']].map(r=>'<div class="wrow'+(now===r[0]?' now':'')+'"><span>'+r[1]+'</span><b class="'+(W[r[0]]?'':'pend')+'">'+esc(W[r[0]]||(now===r[0]?'Listening…':'—'))+'</b></div>').join('')+'</div>';};
+  drawW('emp');
+  await bot('Your salary comes from Acme Technologies. Is that where you work?');
+  await wait({chips:['Yes','No, somewhere else'],parse:t=>/no\b|somewhere|different|other/i.test(t)?'yes':YES.test(t)?'yes':/acme/i.test(t)?'yes':null,retry:'Is Acme Technologies your employer?',demo:'Yes'});
+  W.emp='Acme Technologies';drawW('role');
+  await bg('Employer master',[['Checking Acme Technologies in our employer list',1100]],'Employer verified · Acme Technologies',[['Employer',D.aa.employer],['Category','CAT A (sample)'],['Offices on record','2 in Pune']],{fetch:true,purpose:'Confirm your employer',basis:'Salary credits on your bank statement',request:{employer:'Acme Technologies'}});
+  await bot('What\'s your role there?');
+  W.role=await wait({chips:['Software engineer','Analyst','Manager','Sales'],parse:t=>{let s=t.replace(/^(i am|i'm|im|i work as|working as|my role is|my title is|as)\s+(an?\s+)?/i,'').replace(/[.!]+$/,'').trim();return s&&s.split(/\s+/).length<=6&&!/\d/.test(s)?titleCase(s):null;},retry:'What\'s your job title?',demo:'Software engineer'});
+  drawW('exp');
+  await bot('And how many years have you been working?');
+  W.exp=await wait({chips:['Under 1 year','1–3 years','3–5 years','5+ years'],parse:t=>{if(/under|less than|fresher|few months/i.test(t))return 'Under 1 year';const m=wordsToNum(t).match(/(\d+(?:\.\d+)?)/);if(!m)return null;const y=+m[1];return y<1?'Under 1 year':y<3?'1–3 years':y<5?'3–5 years':'5+ years';},retry:'Roughly how many years? Like "four years".',demo:'About four years'});
+  drawW('office');
+  await bot('Which office do you work from: Hinjawadi or Magarpatta?');
+  W.office=await wait({chips:['Hinjawadi','Magarpatta'],parse:t=>/hinja|hinje|phase|first/i.test(t)?D.offices[0]:/magar|hadapsar|second/i.test(t)?D.offices[1]:null,retry:'Hinjawadi or Magarpatta?',demo:'Hinjawadi'});
+  drawW(null);await pause(500);
+  you('Employment','4 work details captured by voice');
+  fold(wc,'Work details · 4 answers','Employment agent',[['Employer',W.emp],['Role',W.role],['Experience',W.exp],['Office',W.office]]);
+
+  stage(10);
+  const lim=Math.ceil(q.emi*1.5/100)*100;
+  await bot('Last step, '+N+': let\'s set up auto-pay for your EMIs with UPI AutoPay.');
+  const mc=card('<div class="payb"><i>UPI</i>UPI AutoPay</div><div class="kvs">'+[['EMI',fmt(q.emi)+' on the 5th'],['From',X.bank.short+' ••'+X.bank.acc],['Starts',dstr(fe)],['Ends',dstr(addM(fe,q.n-1))]].map(r=>'<div class="kv"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')+'</div><button class="btn" data-a="go">Set up UPI AutoPay</button>');
+  bind(mc,{go:()=>settle('go')});
+  await wait({parse:t=>/set ?up|yes|go ahead|ok|okay|start|autopay|auto pay|upi|sure|proceed/i.test(t)?'go':null,chips:['Go ahead'],retry:'Say "go ahead" or tap Set up UPI AutoPay.',demo:'Go ahead'});
+  const ps=openSheet('<div class="sht"><div class="payb"><i>UPI</i>UPI AutoPay</div><span class="tag">Demo</span></div><div><h2 style="margin:0;font-size:19px;font-weight:650">Approve auto-pay for your loan</h2></div>'+
+    '<div class="kvs">'+[['Maximum per debit',fmt(lim)],['Frequency','Monthly, on the 5th'],['From account',X.bank.name+' ••'+X.bank.acc],['Valid until',dstr(addM(fe,q.n+1))]].map(r=>'<div class="kv"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('')+'</div>'+
+    '<div class="note">In the live app you\'d confirm with your UPI PIN in your UPI app. This prototype never asks for it.</div><button class="btn" data-a="ok">Approve</button>',{modal:true});
+  bind(ps,{ok:()=>settle('ok')});
+  await wait({parse:()=>null,tapRe:/\b(yes|approve|ok|okay|sure|go ahead|haan|done)\b/i,tapMsg:'Approving a mandate needs your tap: tap Approve.',retry:'Tap Approve to set up auto-pay.',demo:()=>settle('ok'),demoDelay:1800});
+  you('UPI AutoPay','Customer approved the auto-pay mandate');
+  closeLayer();mc.remove();
+  await bg('UPI AutoPay',[['Activating UPI AutoPay',1400]],'Auto-pay active · UPI AutoPay',[['EMI',fmt(q.emi)+' monthly'],['Debit date','5th of every month'],['From',X.bank.name+' ••'+X.bank.acc],['Mandate ref','UPI-'+Math.floor(1e7+Math.random()*9e7)]]);
+
+  stage(11);
+  const app='APP-'+Math.floor(100000+Math.random()*899999);
+  await bg('Loan system',[['Submitting your application',1300],['Starting final checks',1000]],'Application submitted · '+app,[['Reference',app],['Loan',fmt(q.P)+' · '+q.n+' months'],['Disbursal to',X.bank.name+' ••'+X.bank.acc]]);
+  await bot('You\'re all set, '+N+'. '+fmt(q.net)+' will reach your '+X.bank.short+' account within 24 hours. I\'ll message you as soon as it\'s sent.');
+  const fc=card('<div class="okhead"><span class="okic">'+I.check(20)+'</span><div><b>Application submitted</b><span>'+app+'</span></div></div>'+
+    '<div class="trk"><div class="tr ok"><span class="td">'+I.check(10)+'</span><div>Application submitted<span>Just now</span></div></div><div class="tr cur"><span class="td"></span><div>Final checks<span>In progress</span></div></div><div class="tr"><span class="td"></span><div>'+fmt(q.net)+' in your '+X.bank.short+' account<span>Within 24 hours</span></div></div></div>'+
+    '<div class="note">First EMI of '+fmt(q.emi)+' on '+dstr(fe)+', paid automatically through UPI AutoPay.</div><button class="btn2" data-a="again">Start again</button>');
+  bind(fc,{again:()=>restart(false)});
+  S.auto=false;S.done=true;STAGE=STAGES.length-1;panel();micUi();setSugg([]);
+}
+
+/* ================= video KYC (simulated, uses the front camera when the browser allows) ================= */
+let VK_STREAM=null;
+async function vkyc(N){
+  const id=RUN;
+  const v=el('<div class="vk" role="dialog" aria-label="Video KYC call"><div class="vkcam"><video playsinline muted autoplay></video><div class="vkph"><svg width="180" height="220" viewBox="0 0 180 220" fill="#AAB2CC"><circle cx="90" cy="78" r="44"/><path d="M10 220c0-48 36-82 80-82s80 34 80 82z"/></svg></div></div>'+
+    '<div class="vkface"></div><div class="vkframe" hidden><i></i><i></i><i></i><i></i><div class="vkdoc"></div><div class="vkscan"></div></div>'+
+    '<div class="vktop"><span class="rec"><i></i>REC <b class="vkt">00:00</b></span><span>Video KYC</span></div>'+
+    '<div class="vkoff"><span class="av">P</span><span>Priya<br>KYC officer</span></div>'+
+    '<div class="vkfoot"><div class="vkcap"><small>KYC officer</small><span class="cap">Connecting…</span></div><div class="vkchk"><span data-k="face">Face</span><span data-k="aad">Aadhaar</span><span data-k="pan">PAN</span></div><button class="btn light" data-a="show" hidden>I\'m showing it</button></div></div>');
+  $('#app').appendChild(v);
+  const t0=Date.now();const tick=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);v.querySelector('.vkt').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');},500);
+  const close=()=>{clearInterval(tick);if(VK_STREAM){VK_STREAM.getTracks().forEach(t=>t.stop());VK_STREAM=null;}v.remove();};
+  VK_CLOSE=close;
+  try{if(!S.auto&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.isSecureContext){VK_STREAM=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});const vid=v.querySelector('video');vid.srcObject=VK_STREAM;vid.play&&vid.play().catch(()=>{});v.querySelector('.vkcam').classList.add('live');}}catch(e){}
+  if(id!==RUN){close();throw ABORT;}
+  const off=v.querySelector('.vkoff'),cap=v.querySelector('.cap'),face=v.querySelector('.vkface'),fr=v.querySelector('.vkframe'),btn=v.querySelector('[data-a=show]');
+  const say=async t=>{cap.textContent=t;off.classList.add('talk');await speak(t);off.classList.remove('talk');guard(id);};
+  const ok=k=>{v.querySelector('[data-k='+k+']').classList.add('ok');v.querySelector('[data-k='+k+']').innerHTML=I.check(10)+' '+v.querySelector('[data-k='+k+']').textContent;};
+  bind(v,{show:()=>settle('ok')});
+  try{
+    await pause(900);
+    await say('Hello '+N+', I\'m Priya, your KYC officer. This call is recorded. Please look at the camera.');
+    face.classList.add('scan');await pause(2000);face.classList.remove('scan');face.classList.add('ok');ok('face');you('Video KYC','Face matched');
+    await pause(500);face.style.display='none';
+    const docs=[['aad','Please hold the front of your Aadhaar card inside the frame.','Aadhaar',docArt('aad')],['pan','Thank you. Now please show your PAN card.','PAN',docArt('pan')]];
+    for(const d of docs){
+      fr.hidden=false;fr.classList.remove('ok');fr.querySelector('.vkdoc').innerHTML=d[3];
+      await say(d[1]);btn.hidden=false;
+      await wait({parse:t=>/show|holding|here|done|ready|yes|ok|okay|this/i.test(t)?'ok':null,retry:'Hold it inside the frame and say "done".',demo:'ok',demoDelay:1700});
+      btn.hidden=true;fr.classList.add('scan');cap.textContent='Checking your '+d[2]+'…';await pause(1700);fr.classList.remove('scan');fr.classList.add('ok');ok(d[0]);you('Video KYC',d[2]+' matched');await pause(600);
+    }
+    fr.hidden=true;
+    await say('All done, '+N+'. Your video KYC is complete. Thank you.');
+    await pause(800);
+  }finally{close();VK_CLOSE=null;}
+}
+let VK_CLOSE=null;
+function docArt(k){return k==='aad'?
+  '<svg viewBox="0 0 242 144" width="100%" height="100%"><rect width="242" height="144" fill="#FBF7EF"/><rect width="242" height="22" fill="#E8792B"/><rect y="122" width="242" height="22" fill="#2E8B57" opacity=".85"/><text x="10" y="15" font-size="10" font-weight="700" fill="#fff" font-family="Inter,sans-serif">AADHAAR · SAMPLE</text><rect x="12" y="34" width="52" height="64" rx="4" fill="#CBD2E0"/><rect x="76" y="38" width="100" height="7" rx="3" fill="#2A3047"/><rect x="76" y="54" width="70" height="6" rx="3" fill="#8A91A6"/><rect x="76" y="68" width="60" height="6" rx="3" fill="#8A91A6"/><text x="76" y="106" font-size="13" font-weight="700" fill="#2A3047" font-family="Inter,sans-serif" letter-spacing="2">XXXX XXXX 7731</text></svg>':
+  '<svg viewBox="0 0 242 144" width="100%" height="100%"><defs><linearGradient id="pg" x1="0" x2="1"><stop offset="0" stop-color="#CFE3F7"/><stop offset="1" stop-color="#E9D9C4"/></linearGradient></defs><rect width="242" height="144" fill="url(#pg)"/><text x="10" y="18" font-size="9" font-weight="700" fill="#163A63" font-family="Inter,sans-serif">INCOME TAX DEPARTMENT · SAMPLE</text><text x="10" y="50" font-size="15" font-weight="700" fill="#222" font-family="monospace" letter-spacing="1">BXZPS4821M</text><rect x="10" y="66" width="90" height="7" rx="3" fill="#2A3047"/><rect x="10" y="82" width="70" height="6" rx="3" fill="#6B7280"/><rect x="10" y="98" width="56" height="6" rx="3" fill="#6B7280"/><rect x="176" y="40" width="54" height="66" rx="4" fill="#B9C6D6"/></svg>';}
+
+/* ================= side panel ================= */
+function panel(){
+  const steps='<div class="sl">Journey</div><ol class="steps">'+STAGES.map((s,i)=>'<li class="'+(i<STAGE?'done':i===STAGE?'cur':'')+'"><i>'+(i<STAGE?I.check(9):'')+'</i>'+esc(s)+'</li>').join('')+'</ol>';
+  const log='<div class="sl">Background activity</div><div class="lg">'+(LOG.length?LOG.slice(0,60).map(e=>'<div class="le '+e.status+'"><div class="l1">'+esc(e.src)+' <em>'+(e.status==='run'?'running':e.status==='done'?'done':'customer')+'</em><span class="t">'+tstr(e.at)+(e.ms?' · '+(e.ms/1000).toFixed(1)+'s':'')+'</span></div><div class="l2">'+esc(e.text)+(e.o&&e.o.fetch?'<button class="lrec" data-li="'+LOG.indexOf(e)+'">View records</button>':'')+'</div></div>').join(''):'<div class="empty">Nothing yet. Start the journey.</div>')+'</div>';
+  $('#panelBody').innerHTML=steps+log;const vi=$('#vinfo');if(vi)vi.innerHTML=I.spk.replace(/20/g,'13')+'<span>Voice: '+esc(VOICE_NOTE)+' · speed '+RATE+'×</span>';
+  $('#pAuto').textContent=S.auto?'■ Stop auto-play':'▶ Auto-play demo';
+  const ms=document.querySelector('#mobPanel');if(ms)ms.innerHTML=steps+log;
+}
+function openMobilePanel(){const sh=openSheet('<div class="sht"><div><h2>Behind the screen</h2><p>What SuperAgent did in the background</p></div><button class="ib" data-close aria-label="Close" style="margin:-6px -8px 0 0">'+I.close+'</button></div><div class="row2"><button class="btn2" id="mAuto">'+(S.auto?'Stop auto-play':'Auto-play demo')+'</button></div><div id="mobPanel" style="--page:#F7F8FB;--page-fg:#151A2E;--page-dim:#6B7280;--page-line:#E7E4F0;--panel:#fff"></div>');
+  panel();sh.querySelector('#mAuto').onclick=()=>{closeLayer();toggleAuto();};}
+
+/* ================= start / restart / auto-play ================= */
+function begin(o){
+  S.started=true;$('#start').classList.add('gone');
+  S.voice=!!o.voice;S.auto=!!o.auto;S.speak=true;
+  if(S.voice&&!canListen()){S.micBlocked=!SR||!window.isSecureContext;}
+  if(CAN_SPEAK){try{speechSynthesis.getVoices();}catch(e){}}
+  restart(S.auto);
+}
+function restart(auto){
+  RUN++;const c=CUR;CUR=null;clearTimeout(DEMO_T);stopListening();stopSpeaking();if(c)c.res(null);
+  if(VK_CLOSE){VK_CLOSE();VK_CLOSE=null;}layer.innerHTML='';
+  thread.innerHTML='';setSugg([]);LOG.length=0;S.agent=false;$('#saBadge').classList.remove('on');setStatus(null);
+  S.auto=!!auto;S.done=false;STAGE=-1;panel();micUi();
+  journey().catch(e=>{if(e!==ABORT)console.error(e);});
+}
+function toggleAuto(){
+  if(!S.started){begin({voice:true,auto:true});return;}
+  if(S.done){restart(true);return;}
+  S.auto=!S.auto;if(S.auto){stopListening();scheduleDemo();}else{clearTimeout(DEMO_T);listenSoon();}panel();micUi();
+}
+
+/* ================= events ================= */
+$('#startVoice').onclick=()=>begin({voice:true});
+$('#orbBtn').onclick=()=>begin({voice:true});
+$('#startText').onclick=()=>begin({voice:false});
+$('#startDemo').onclick=()=>begin({voice:true,auto:true});
+$('#pAuto').onclick=toggleAuto;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-li]');if(!b)return;const en=LOG[+b.dataset.li];if(en)openRecords(en);});
+$('#pRst').onclick=()=>{if(!S.started)return;restart(false);};
+$('#rstBtn').onclick=()=>{if(!S.started)return;restart(false);};
+$('#actBtn').onclick=openMobilePanel;
+$('#hst').onclick=()=>{if(window.innerWidth<=960)openMobilePanel();};
+$('#spkBtn').onclick=()=>{S.speak=!S.speak;if(!S.speak)stopSpeaking();micUi();toast(S.speak?'Replies will be spoken':'Replies muted');};
+micBtn.onclick=()=>{
+  if(!S.started){begin({voice:true});return;}
+  if(S.auto){toggleAuto();return;}
+  if(!canListen()){S.voice=!S.voice;micUi();toast(!SR?'Voice input isn\'t supported in this browser. Try Chrome or Edge, or tap a suggestion.':'The microphone isn\'t available in this view. Open the file in Chrome to talk; here, tap a suggestion or type.');return;}
+  S.voice=!S.voice;emptyRuns=0;if(S.voice){stopSpeaking();listenSoon(100);}else stopListening();micUi();
+};
+$('#bar').addEventListener('submit',e=>{e.preventDefault();if(!S.started){begin({voice:false});return;}const t=inp.value.trim();if(t)onInput(t,'text');});
+inp.addEventListener('input',()=>{if(listening)stopListening();sendUi();});
+document.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input'))return;if(e.metaKey||e.ctrlKey||e.altKey)return;if(e.key==='d'||e.key==='D'){document.body.classList.toggle('noside');fit();}});
+
+/* ================= boot ================= */
+const show=$('#show');
+function fit(){if(window.innerWidth<=520){show.style.transform='';return;}const side=!document.body.classList.contains('noside')&&window.innerWidth>960;const W=414+(side?32+380:0);const k=Math.min(1,(window.innerHeight-24)/868,(window.innerWidth-32)/W);show.style.transform='scale('+k+')';}
+window.addEventListener('resize',fit);
+function clock(){const d=new Date();$('#clock').textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0');}
+clock();setInterval(clock,15000);
+micUi();panel();fit();
+try{window.__pl={stage:()=>STAGE,total:STAGES.length,log:()=>LOG,auto:()=>S.auto};}catch(e){}
+})();
+</script>
+</body>
+</html>
